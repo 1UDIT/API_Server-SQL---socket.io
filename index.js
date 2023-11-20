@@ -21,26 +21,66 @@ const PlayList = require("./src/Router/PlayList");
 const tableField = require("./src/Router/TableMetaData");
 const mysql = require('mysql');
 const MySQLEvents = require('@rodrigogs/mysql-events');
+const moment = require('moment/moment');
 let data = Array(0);
 let currentData = Array(0);
 
 app.use(cors());
 
 app.use("/api/getPlaylist", PlayList);
-io.sockets.on('connection', async (socket) => {
-    console.log('Socket.IO connection established');
+io.sockets.on('connection', async (socket) => { 
     // tableField(io, socket);
 
-    mysqlConnection.query('SELECT * FROM log_viewer.rundown_log', function (err, results) {
+    mysqlConnection.query(`SELECT CONVERT(date,Date) as Date, Time, APP_Name, Source_Dest, Event, LEVEL, Event_DESCRI FROM log_viewer.rundown_log`, function (err, results) {
         if (err) {
             console.error('Error executing SQL query:', err);
-            callback(err, null);
-
         } else {
             data = results;
-            socket.emit('data-update', data);
+            let cols = data.map((key) => {
+                var date = new Date(key.Date);
+                if (!isNaN(date.getTime())) {
+                    // Months use 0 index.
+                    return {
+                        Date: `${date.getDate()}` + '-' + `${date.getMonth() + 1}` + '-' + `${date.getFullYear()}`,
+                        Time: key.Time,
+                        APP_Name: key.APP_Name,
+                        Source_Dest: key.Source_Dest,
+                        Event: key.Event,
+                        LEVEL: key.LEVEL,
+                        Event_DESCRI: key.Event_DESCRI,
+                    };
+                }
+
+            });
+            socket.emit('data-update', cols);
         }
     });
+
+    await socket.on('data-update', (Date) => {
+        mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log WHERE CONVERT(date, Date) BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")}' ;`, function (err, results) {
+            if (err) {
+                console.error('Error executing SQL query:', err);
+            } else {
+                data = results;
+                let cols = data.map((key) => { 
+                    if (!isNaN(key.Date.getTime())) {
+                        // Months use 0 index.
+                        return {
+                            Date: `${key.Date.getDate()}` + '-' + `${key.Date.getMonth() + 1}` + '-' + `${key.Date.getFullYear()}`,
+                            Time: key.Time,
+                            APP_Name: key.APP_Name,
+                            Source_Dest: key.Source_Dest,
+                            Event: key.Event,
+                            LEVEL: key.LEVEL,
+                            Event_DESCRI: key.Event_DESCRI,
+                        };
+                    }
+    
+                });
+                io.sockets.emit('data-update', [...cols]);
+            }
+        });
+    })
 
     await socket.on('message', () => {
         console.log('Socket.IO message');
@@ -133,9 +173,6 @@ const program = async () => {
 program()
     .then(() => console.log('Waiting for database events...'))
     .catch(console.error);
-
-
-
 
 const port = properties.get('PORT') || 8888;
 server.listen(port, () => {
