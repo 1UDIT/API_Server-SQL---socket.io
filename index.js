@@ -11,14 +11,11 @@ const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: '*',
-    },
-    'pingInterval': 10,
-    rememberTransport: false,
-    transports: ["websocket"],
+    },     
 });
 
-const PlayList = require("./src/Router/PlayList");
-const tableField = require("./src/Router/TableMetaData");
+const tableField = require("./src/Router/PlayList"); 
+const DataExport = require("./src/Router/DataExport");
 const mysql = require('mysql');
 const MySQLEvents = require('@rodrigogs/mysql-events');
 const moment = require('moment/moment');
@@ -27,11 +24,14 @@ let currentData = Array(0);
 
 app.use(cors());
 
-app.use("/api/getPlaylist", PlayList);
-io.sockets.on('connection', async (socket) => { 
+app.use("/api/getPlaylist", tableField);
+app.use("/api/ExportData",DataExport);
+
+
+io.sockets.on('connection', async (socket) => {
     // tableField(io, socket);
 
-    mysqlConnection.query(`SELECT CONVERT(date,Date) as Date, Time, APP_Name, Source_Dest, Event, LEVEL, Event_DESCRI FROM log_viewer.rundown_log`, function (err, results) {
+    mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log`, function (err, results) {
         if (err) {
             console.error('Error executing SQL query:', err);
         } else {
@@ -41,6 +41,7 @@ io.sockets.on('connection', async (socket) => {
                 if (!isNaN(date.getTime())) {
                     // Months use 0 index.
                     return {
+                        id: key.id,
                         Date: `${date.getDate()}` + '-' + `${date.getMonth() + 1}` + '-' + `${date.getFullYear()}`,
                         Time: key.Time,
                         APP_Name: key.APP_Name,
@@ -62,10 +63,11 @@ io.sockets.on('connection', async (socket) => {
                 console.error('Error executing SQL query:', err);
             } else {
                 data = results;
-                let cols = data.map((key) => { 
+                let cols = data.map((key) => {
                     if (!isNaN(key.Date.getTime())) {
                         // Months use 0 index.
                         return {
+                            id: key.id,
                             Date: `${key.Date.getDate()}` + '-' + `${key.Date.getMonth() + 1}` + '-' + `${key.Date.getFullYear()}`,
                             Time: key.Time,
                             APP_Name: key.APP_Name,
@@ -75,16 +77,13 @@ io.sockets.on('connection', async (socket) => {
                             Event_DESCRI: key.Event_DESCRI,
                         };
                     }
-    
+
                 });
                 io.sockets.emit('data-update', [...cols]);
             }
         });
-    })
-
-    await socket.on('message', () => {
-        console.log('Socket.IO message');
     });
+
     await socket.on('disconnect', () => {
         console.log('Socket.IO connection closed');
     });
@@ -133,7 +132,6 @@ const program = async () => {
 
                 case "UPDATE":
                     newData = currentData[0].after;
-                    console.log(newData, "newData");
                     // Find index of the deleted product in the current array, if it was there
                     let index2 = data.findIndex(p => p.id === newData.id);
                     // If product is present, index will be gt -1
