@@ -11,10 +11,10 @@ const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: '*',
-    },     
+    },
 });
 
-const tableField = require("./src/Router/PlayList"); 
+const tableField = require("./src/Router/PlayList");
 const DataExport = require("./src/Router/DataExport");
 const mysql = require('mysql');
 const MySQLEvents = require('@rodrigogs/mysql-events');
@@ -25,17 +25,18 @@ let currentData = Array(0);
 app.use(cors());
 
 app.use("/api/getPlaylist", tableField);
-app.use("/api/ExportData",DataExport);
+app.use("/api/ExportData", DataExport);
 
 
 io.sockets.on('connection', async (socket) => {
     // tableField(io, socket);
 
-    mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log`, function (err, results) {
+    mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log;`, function (err, results) {
         if (err) {
             console.error('Error executing SQL query:', err);
         } else {
             data = results;
+            console.log(data);
             let cols = data.map((key) => {
                 var date = new Date(key.Date);
                 if (!isNaN(date.getTime())) {
@@ -53,7 +54,7 @@ io.sockets.on('connection', async (socket) => {
                 }
 
             });
-            socket.emit('data-update', cols);
+            socket.emit('data-update', data);
         }
     });
 
@@ -62,24 +63,8 @@ io.sockets.on('connection', async (socket) => {
             if (err) {
                 console.error('Error executing SQL query:', err);
             } else {
-                data = results;
-                let cols = data.map((key) => {
-                    if (!isNaN(key.Date.getTime())) {
-                        // Months use 0 index.
-                        return {
-                            id: key.id,
-                            Date: `${key.Date.getDate()}` + '-' + `${key.Date.getMonth() + 1}` + '-' + `${key.Date.getFullYear()}`,
-                            Time: key.Time,
-                            APP_Name: key.APP_Name,
-                            Source_Dest: key.Source_Dest,
-                            Event: key.Event,
-                            LEVEL: key.LEVEL,
-                            Event_DESCRI: key.Event_DESCRI,
-                        };
-                    }
-
-                });
-                io.sockets.emit('data-update', [...cols]);
+                data = results;                
+                io.sockets.emit('data-update', [...results]);
             }
         });
     });
@@ -134,7 +119,7 @@ const program = async () => {
                     newData = currentData[0].after;
                     // Find index of the deleted product in the current array, if it was there
                     let index2 = data.findIndex(p => p.id === newData.id);
-                    // If product is present, index will be gt -1
+                    // If product is present, index will be gt -1 
                     if (index2 > -1) {
                         data[index2] = newData;
                         io.sockets.emit('data-update', [...data]);
@@ -148,7 +133,7 @@ const program = async () => {
                     mysqlConnection.query('SELECT * FROM log_viewer.rundown_log', function (err, results) {
                         if (err) {
                             console.error('Error executing SQL query:', err);
-                            callback(err, null);
+                            
 
                         } else {
                             data = results;
