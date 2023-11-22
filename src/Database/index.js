@@ -18,7 +18,7 @@ var mysqlConnection = mysql.createConnection({
 
 mysqlConnection.connect(function (err) {
   if (err) throw err;
-  console.log("Connected!");
+  console.log("Connected DataBase!");
 });
 
 module.exports = mysqlConnection;
