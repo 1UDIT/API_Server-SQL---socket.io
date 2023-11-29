@@ -67,7 +67,7 @@ io.sockets.on('connection', async (socket) => {
                 // console.log("Query Run", Date,page);
                 data = results;
                 // console.log("data", results.length);
-                const pageCount = Math.ceil(results.length / 16);
+                const pageCount = Math.ceil(results.length / 21);
                 pagecount = pageCount;
                 Pagebtn = page;
                 if (!page) { page = 1; Pagebtn = 1; }
@@ -79,7 +79,7 @@ io.sockets.on('connection', async (socket) => {
                 io.sockets.emit('data-update', {
                     "page": page,
                     "pageCount": pageCount,
-                    "Api": results.slice(page * 16 - 16, page * 16) 
+                    "Api": results.slice(page * 21 - 21, page * 21) 
                 });
             }
         });
