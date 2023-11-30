@@ -12,59 +12,70 @@ const io = socketIo(server, {
     cors: {
         origin: '*',
     },
+    extraHeaders: {
+        Cookie: 'sticky_cookie=123123123',
+    },
 });
 
 const tableField = require("./src/Router/PlayList");
+const tableMonitorField = require("./src/Router/tableMonitorField.js");
 const DataExport = require("./src/Router/DataExport");
 const mysql = require('mysql');
 const MySQLEvents = require('@rodrigogs/mysql-events');
 const moment = require('moment/moment');
-let data = Array(0);
+let data, Monitoringdata = Array(0);
 let Pagebtn, pagecount;
 let currentData = Array(0);
 
 app.use(cors());
 
-app.use("/api/getPlaylist", tableField);
+app.use("/api/GetTableHeader", tableField);
 app.use("/api/ExportData", DataExport);
+app.use("/api/MontiorTableHeader", tableMonitorField);
+const MonitorData = io.of('/MonitorData');
+const Notification = io.of('/Notification');
 
+// Notification.on('connection', async (socket) => {
+//     socket.emit('chat message', 'everyone');
+//     socket.on('data-update', (Date, page) => {
 
-io.sockets.on('connection', async (socket) => {
-    // tableField(io, socket);
+//         mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log WHERE  Date BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")} order by Date desc' ;`, function (err, results) {
+//             if (err) {
+//                 console.error('Error executing SQL query:', err);
+//             } else {
+//                 console.log(' Date, page', Date, page);
+//                 data = results;
+//                 console.log("data sql", results.length);
+//                 const pageCount = Math.ceil(results.length / 21);
+//                 pagecount = pageCount;
+//                 Pagebtn = page; 
+//                 if (!page) {
+//                     console.log(' Pagebtn, page', Pagebtn, page);
+//                     page = 1;
+//                     Pagebtn = 1;
+//                 }
+//                 if (page > pageCount) {
+//                     console.log(' pageCount, Pagebtn', pageCount, Pagebtn);
+//                     page = pageCount
+//                     Pagebtn = page;
+//                 }
+//                 // io.sockets.emit('data-update', [...results.slice(page * 10 - 10, page * 10)]);
+//                 socket.emit('data-update', {
+//                     "page": page,
+//                     "pageCount": pageCount,
+//                     "Api": results.slice(page * 21 - 21, page * 21)
+//                 });
+//             }
+//         });
+//     });
+// });
 
-    // mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log;`, function (err, results) {
-    //     if (err) {
-    //         console.error('Error executing SQL query:', err);
-    //     } else {
-    //         data = results;
-    //         console.log("Query Run");
-    //         // let cols = data.map((key) => {
-    //         //     var date = new Date(key.Date);
-    //         //     if (!isNaN(date.getTime())) {
-    //         //         // Months use 0 index.
-    //         //         return {
-    //         //             id: key.id,
-    //         //             Date: `${date.getDate()}` + '-' + `${date.getMonth() + 1}` + '-' + `${date.getFullYear()}`,
-    //         //             Time: key.Time,
-    //         //             APP_Name: key.APP_Name,
-    //         //             Source_Dest: key.Source_Dest,
-    //         //             Event: key.Event,
-    //         //             LEVEL: key.LEVEL,
-    //         //             Event_DESCRI: key.Event_DESCRI,
-    //         //         };
-    //         //     }
-
-    //         // });
-    //         socket.emit('data-update', data);
-    //     }
-    // });
-
+io.sockets.on('connection', async (socket) => {    
     socket.on('data-update', (Date, page) => {
         mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log WHERE  Date BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")} order by Date desc' ;`, function (err, results) {
             if (err) {
                 console.error('Error executing SQL query:', err);
-            } else {
-                // console.log("Query Run", Date,page);
+            } else { 
                 data = results;
                 // console.log("data", results.length);
                 const pageCount = Math.ceil(results.length / 21);
@@ -87,6 +98,23 @@ io.sockets.on('connection', async (socket) => {
 
 
 });
+
+
+MonitorData.on('connect', function (socket) {
+    mysqlConnection.query(`SELECT * FROM log_viewer.monitoringlist;`, function (err, results) {
+        if (err) {
+            console.error('Error executing SQL query:', err);
+        } else {
+            socket.emit('Monitor', { "Api": results });
+        }
+    });
+    // socket.emit('chat message', 'everyone'); 
+    socket.on('disconnect', function () {
+        socket.emit('user disconnected', 'disconnected');
+    });
+});
+
+
 
 
 const program = async () => {
@@ -154,9 +182,9 @@ const program = async () => {
 
                     mysqlConnection.query('SELECT * FROM log_viewer.rundown_log', function (err, results) {
                         if (err) {
-                            console.error('Error executing SQL query:', err); 
+                            console.error('Error executing SQL query:', err);
                         } else {
-                            data = results; 
+                            data = results;
                             io.sockets.emit('data-update', {
                                 "page": Pagebtn,
                                 "pageCount": pagecount,
