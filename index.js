@@ -15,6 +15,8 @@ const io = socketIo(server, {
     extraHeaders: {
         Cookie: 'sticky_cookie=123123123',
     },
+    pingInterval: 20000,
+    pingTimeout: 25000
 });
 
 const tableField = require("./src/Router/PlayList");
@@ -23,59 +25,24 @@ const DataExport = require("./src/Router/DataExport");
 const mysql = require('mysql');
 const MySQLEvents = require('@rodrigogs/mysql-events');
 const moment = require('moment/moment');
-let data, Monitoringdata = Array(0);
+let data = Array(0);
+let Monitoringdata = Array(0);
 let Pagebtn, pagecount;
 let currentData = Array(0);
+
 
 app.use(cors());
 
 app.use("/api/GetTableHeader", tableField);
 app.use("/api/ExportData", DataExport);
 app.use("/api/MontiorTableHeader", tableMonitorField);
-const MonitorData = io.of('/MonitorData');
-const Notification = io.of('/Notification');
 
-// Notification.on('connection', async (socket) => {
-//     socket.emit('chat message', 'everyone');
-//     socket.on('data-update', (Date, page) => {
-
-//         mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log WHERE  Date BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")} order by Date desc' ;`, function (err, results) {
-//             if (err) {
-//                 console.error('Error executing SQL query:', err);
-//             } else {
-//                 console.log(' Date, page', Date, page);
-//                 data = results;
-//                 console.log("data sql", results.length);
-//                 const pageCount = Math.ceil(results.length / 21);
-//                 pagecount = pageCount;
-//                 Pagebtn = page; 
-//                 if (!page) {
-//                     console.log(' Pagebtn, page', Pagebtn, page);
-//                     page = 1;
-//                     Pagebtn = 1;
-//                 }
-//                 if (page > pageCount) {
-//                     console.log(' pageCount, Pagebtn', pageCount, Pagebtn);
-//                     page = pageCount
-//                     Pagebtn = page;
-//                 }
-//                 // io.sockets.emit('data-update', [...results.slice(page * 10 - 10, page * 10)]);
-//                 socket.emit('data-update', {
-//                     "page": page,
-//                     "pageCount": pageCount,
-//                     "Api": results.slice(page * 21 - 21, page * 21)
-//                 });
-//             }
-//         });
-//     });
-// });
-
-io.sockets.on('connection', async (socket) => {    
+io.sockets.on('connection', async (socket) => {
     socket.on('data-update', (Date, page) => {
         mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log WHERE  Date BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")} order by Date desc' ;`, function (err, results) {
             if (err) {
                 console.error('Error executing SQL query:', err);
-            } else { 
+            } else {
                 data = results;
                 // console.log("data", results.length);
                 const pageCount = Math.ceil(results.length / 21);
@@ -85,37 +52,37 @@ io.sockets.on('connection', async (socket) => {
                 if (page > pageCount) {
                     page = pageCount
                     Pagebtn = page;
-                } 
+                }
                 // io.sockets.emit('data-update', [...results.slice(page * 10 - 10, page * 10)]);
                 io.sockets.emit('data-update', {
                     "page": page,
                     "pageCount": pageCount,
-                    "Api": results.slice(page * 21 - 21, page * 21) 
+                    "Api": data.slice(page * 21 - 21, page * 21)
                 });
             }
         });
     });
 
-
-});
-
-
-MonitorData.on('connect', function (socket) {
     mysqlConnection.query(`SELECT * FROM log_viewer.monitoringlist;`, function (err, results) {
         if (err) {
             console.error('Error executing SQL query:', err);
         } else {
-            socket.emit('Monitor', { "Api": results });
+            Monitoringdata = results;
+            io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
         }
-    });
-    // socket.emit('chat message', 'everyone'); 
-    socket.on('disconnect', function () {
-        socket.emit('user disconnected', 'disconnected');
-    });
+    }); 
 });
 
-
-
+// io.sockets.on('connection', async (socket) => {
+//     mysqlConnection.query(`SELECT * FROM log_viewer.monitoringlist;`, function (err, results) {
+//         if (err) {
+//             console.error('Error executing SQL query:', err);
+//         } else {
+//             Monitoringdata = results;
+//             io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+//         }
+//     }); 
+// });
 
 const program = async () => {
     const connection = mysql.createConnection({
@@ -142,22 +109,26 @@ const program = async () => {
             let newData;
             switch (e.type) {
                 case "DELETE":
-                    // Assign current event (before) data to the newData variable
                     newData = currentData[0].before;
-
-                    // Find index of the deleted product in the current array, if it was there
                     let index = data.findIndex(p => p.id === newData.id);
-
-                    // If product is present, index will be gt -1
+                    let monitorIndex = Monitoringdata.findIndex(p => p.id === newData.id);
                     if (index > -1) {
                         data = data.filter(p => p.id !== newData.id);
                         io.sockets.emit('data-update', {
                             "page": Pagebtn,
                             "pageCount": pagecount,
-                            "Api": [...data.slice(Pagebtn * 10 - 10, Pagebtn * 10)]
+                            "Api": [...data.slice(Pagebtn * 21 - 21, Pagebtn * 21)]
                         });
-                    } else {
-                        return;
+                    }
+                    if (monitorIndex > -1) {
+                        mysqlConnection.query('SELECT * FROM log_viewer.monitoringlist', function (err, results) {
+                            if (err) {
+                                console.error('Error executing SQL query:', err);
+                            } else {
+                                Monitoringdata = results;
+                                io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+                            }
+                        });
                     }
                     break;
 
@@ -165,21 +136,23 @@ const program = async () => {
                     newData = currentData[0].after;
                     // Find index of the deleted product in the current array, if it was there
                     let index2 = data.findIndex(p => p.id === newData.id);
+                    let index3 = Monitoringdata.findIndex(p => p.id === newData.id);
                     // If product is present, index will be gt -1  
                     if (index2 > -1) {
                         data[index2] = newData;
                         io.sockets.emit('data-update', {
                             "page": Pagebtn,
                             "pageCount": pagecount,
-                            "Api": [...data.slice(Pagebtn * 10 - 10, Pagebtn * 10)]
+                            "Api": [...data.slice(Pagebtn * 21 - 21, Pagebtn * 21)]
                         });
-                    } else {
-                        return;
+                    }
+                    if (index3 > -1) {
+                        Monitoringdata[index3] = newData;
+                        io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
                     }
                     break;
 
                 case "INSERT":
-
                     mysqlConnection.query('SELECT * FROM log_viewer.rundown_log', function (err, results) {
                         if (err) {
                             console.error('Error executing SQL query:', err);
@@ -188,8 +161,16 @@ const program = async () => {
                             io.sockets.emit('data-update', {
                                 "page": Pagebtn,
                                 "pageCount": pagecount,
-                                "Api": [...data.slice(Pagebtn * 10 - 10, Pagebtn * 10)]
+                                "Api": [...data.slice(Pagebtn * 21 - 21, Pagebtn * 21)]
                             });
+                        }
+                    });
+                    mysqlConnection.query('SELECT * FROM log_viewer.monitoringlist', function (err, results) {
+                        if (err) {
+                            console.error('Error executing SQL query:', err);
+                        } else {
+                            Monitoringdata = results;
+                            io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
                         }
                     });
                     break;
