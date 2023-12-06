@@ -14,6 +14,7 @@ var mysqlConnection = mysql.createConnection({
   user: user,
   password: password,
   database: database,
+  timezone: 'utc'
 });
 
 mysqlConnection.connect(function (err) {

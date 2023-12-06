@@ -1,8 +1,11 @@
 const mysqlConnection = require("../Database/index");
+const properties = require('../../propertiesReader');
 
+const Monitoring_header = properties.get('Monitoring_header');
+ 
 
 const getMonitorHeader = async (req, res, next) => {
-    mysqlConnection.query('SELECT  * from monitoringheader  order by Sequence;', function (err, rows) {
+    mysqlConnection.query(`SELECT  * from ${Monitoring_header}  order by Sequence;`, function (err, rows) {
         if (err) {
             res.status(400).send(err);
         } else {

@@ -1,8 +1,11 @@
 const mysqlConnection = require("../Database/index");
+const properties = require('../../propertiesReader');
 
+const MainTable_header = properties.get('EventLog_Header');
+ 
 
 const getPlayList = async (req, res, next) => {
-    mysqlConnection.query('SELECT  Field_name,Display_name,Sequence, Display_size, Wrapping from table_field_details  order by Sequence;', function (err, rows) {
+    mysqlConnection.query(`SELECT  * from ${MainTable_header}  order by Sequence;`, function (err, rows) {
         if (err) {
             res.status(400).send(err);
         } else {

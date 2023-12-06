@@ -37,9 +37,12 @@ app.use("/api/GetTableHeader", tableField);
 app.use("/api/ExportData", DataExport);
 app.use("/api/MontiorTableHeader", tableMonitorField);
 
+const MainTable = properties.get('EventList');
+const MonitoringList = properties.get('monitoringList'); 
+
 io.sockets.on('connection', async (socket) => {
     socket.on('data-update', (Date, page) => {
-        mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log WHERE  Date BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")} order by Date desc' ;`, function (err, results) {
+        mysqlConnection.query(`SELECT * FROM ${MainTable} WHERE Date(eventTime) BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")}' ORDER BY eventTime DESC`, function (err, results) {
             if (err) {
                 console.error('Error executing SQL query:', err);
             } else {
@@ -58,37 +61,30 @@ io.sockets.on('connection', async (socket) => {
                     "page": page,
                     "pageCount": pageCount,
                     "Api": data.slice(page * 21 - 21, page * 21)
-                });
+                }); 
             }
         });
     });
 
-    mysqlConnection.query(`SELECT * FROM log_viewer.monitoringlist;`, function (err, results) {
+    mysqlConnection.query(`SELECT * FROM ${MonitoringList};`, function (err, results) {
         if (err) {
             console.error('Error executing SQL query:', err);
         } else {
             Monitoringdata = results;
             io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+            // console.log('Monitoringdata result', Monitoringdata)
         }
-    }); 
+    });
 });
 
-// io.sockets.on('connection', async (socket) => {
-//     mysqlConnection.query(`SELECT * FROM log_viewer.monitoringlist;`, function (err, results) {
-//         if (err) {
-//             console.error('Error executing SQL query:', err);
-//         } else {
-//             Monitoringdata = results;
-//             io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
-//         }
-//     }); 
-// });
 
 const program = async () => {
     const connection = mysql.createConnection({
         host: properties.get('host'),
         user: properties.get('user'),
         password: properties.get('password'),
+        port:properties.get('port'),
+        timezone: 'utc'
     });
 
     const instance = new MySQLEvents(connection, {
@@ -101,7 +97,7 @@ const program = async () => {
     await instance.start();
 
     instance.addTrigger({
-        name: 'log_viewer',
+        name: `${MainTable}`,
         expression: `${properties.get('database')}.*`,
         statement: MySQLEvents.STATEMENTS.ALL,
         onEvent: (e) => { // You will receive the events here 
@@ -110,10 +106,10 @@ const program = async () => {
             switch (e.type) {
                 case "DELETE":
                     newData = currentData[0].before;
-                    let index = data.findIndex(p => p.id === newData.id);
-                    let monitorIndex = Monitoringdata.findIndex(p => p.id === newData.id);
+                    let index = data.findIndex(p => p.eventId === newData.eventId);
+                    let monitorIndex = Monitoringdata.findIndex(p => p.eventId === newData.eventId);
                     if (index > -1) {
-                        data = data.filter(p => p.id !== newData.id);
+                        data = data.filter(p => p.eventId !== newData.eventId);
                         io.sockets.emit('data-update', {
                             "page": Pagebtn,
                             "pageCount": pagecount,
@@ -121,7 +117,7 @@ const program = async () => {
                         });
                     }
                     if (monitorIndex > -1) {
-                        mysqlConnection.query('SELECT * FROM log_viewer.monitoringlist', function (err, results) {
+                        mysqlConnection.query(`SELECT * FROM ${MonitoringList}`, function (err, results) {
                             if (err) {
                                 console.error('Error executing SQL query:', err);
                             } else {
@@ -135,8 +131,8 @@ const program = async () => {
                 case "UPDATE":
                     newData = currentData[0].after;
                     // Find index of the deleted product in the current array, if it was there
-                    let index2 = data.findIndex(p => p.id === newData.id);
-                    let index3 = Monitoringdata.findIndex(p => p.id === newData.id);
+                    let index2 = data.findIndex(p => p.eventId === newData.eventId);
+                    let index3 = Monitoringdata.findIndex(p => p.eventId === newData.eventId);
                     // If product is present, index will be gt -1  
                     if (index2 > -1) {
                         data[index2] = newData;
@@ -153,7 +149,7 @@ const program = async () => {
                     break;
 
                 case "INSERT":
-                    mysqlConnection.query('SELECT * FROM log_viewer.rundown_log', function (err, results) {
+                    mysqlConnection.query(`SELECT * FROM ${MainTable} ORDER BY eventTime DESC`, function (err, results) {
                         if (err) {
                             console.error('Error executing SQL query:', err);
                         } else {
@@ -165,7 +161,7 @@ const program = async () => {
                             });
                         }
                     });
-                    mysqlConnection.query('SELECT * FROM log_viewer.monitoringlist', function (err, results) {
+                    mysqlConnection.query(`SELECT * FROM ${MonitoringList}`, function (err, results) {
                         if (err) {
                             console.error('Error executing SQL query:', err);
                         } else {

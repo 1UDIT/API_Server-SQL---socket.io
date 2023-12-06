@@ -1,8 +1,11 @@
 const mysqlConnection = require("../Database/index");
+const properties = require('../../propertiesReader');
+
+const MainTable = properties.get('EventList');
 
 
-const Export = async (req, res, next) => { 
-    mysqlConnection.query(`SELECT * FROM log_viewer.rundown_log WHERE CONVERT(date, Date) BETWEEN '${req.query.prevDate}' AND '${req.query.startDate}'`, function (err, rows) {
+const Export = async (req, res, next) => {
+    mysqlConnection.query(`SELECT * FROM ${MainTable} WHERE  Date(eventTime) BETWEEN '${req.query.prevDate}' AND '${req.query.startDate}'`, function (err, rows) {
         if (err) {
             res.status(400).send(err);
         } else {
