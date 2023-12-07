@@ -38,42 +38,52 @@ app.use("/api/ExportData", DataExport);
 app.use("/api/MontiorTableHeader", tableMonitorField);
 
 const MainTable = properties.get('EventList');
-const MonitoringList = properties.get('monitoringList'); 
+const MonitoringList = properties.get('monitoringList');
 
 io.sockets.on('connection', async (socket) => {
     socket.on('data-update', (Date, page) => {
-        mysqlConnection.query(`SELECT * FROM ${MainTable} WHERE Date(eventTime) BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")}' ORDER BY eventTime DESC`, function (err, results) {
-            if (err) {
-                console.error('Error executing SQL query:', err);
-            } else {
-                data = results;
-                // console.log("data", results.length);
-                const pageCount = Math.ceil(results.length / 21);
-                pagecount = pageCount;
-                Pagebtn = page;
-                if (!page) { page = 1; Pagebtn = 1; }
-                if (page > pageCount) {
-                    page = pageCount
+        mysqlConnection.getConnection(function (err, connection) {
+            if (err) throw err; // not connected!
+            // Use the connection
+            mysqlConnection.query(`SELECT * FROM ${MainTable} WHERE Date(eventTime) BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")}' ORDER BY eventTime DESC`, function (err, results) {
+                if (err) {
+                    console.error('Error executing SQL query:', err);
+                } else {
+                    data = results;
+                    // console.log("data", results.length);
+                    const pageCount = Math.ceil(results.length / 21);
+                    pagecount = pageCount;
                     Pagebtn = page;
+                    if (!page) { page = 1; Pagebtn = 1; }
+                    if (page > pageCount) {
+                        page = pageCount
+                        Pagebtn = page;
+                    }
+                    // io.sockets.emit('data-update', [...results.slice(page * 10 - 10, page * 10)]);
+                    io.sockets.emit('data-update', {
+                        "page": page,
+                        "pageCount": pageCount,
+                        "Api": data.slice(page * 21 - 21, page * 21)
+                    });
+                    connection.release();
                 }
-                // io.sockets.emit('data-update', [...results.slice(page * 10 - 10, page * 10)]);
-                io.sockets.emit('data-update', {
-                    "page": page,
-                    "pageCount": pageCount,
-                    "Api": data.slice(page * 21 - 21, page * 21)
-                }); 
-            }
+            });
         });
     });
 
-    mysqlConnection.query(`SELECT * FROM ${MonitoringList};`, function (err, results) {
-        if (err) {
-            console.error('Error executing SQL query:', err);
-        } else {
-            Monitoringdata = results;
-            io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
-            // console.log('Monitoringdata result', Monitoringdata)
-        }
+    mysqlConnection.getConnection(function (err, connection) {
+        if (err) throw err; // not connected!
+        // Use the connection
+        mysqlConnection.query(`SELECT * FROM ${MonitoringList};`, function (err, results) {
+            if (err) {
+                console.error('Error executing SQL query:', err);
+            } else {
+                Monitoringdata = results;
+                io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+                // console.log('Monitoringdata result', Monitoringdata)  
+                connection.release();
+            }
+        });
     });
 });
 
@@ -83,7 +93,7 @@ const program = async () => {
         host: properties.get('host'),
         user: properties.get('user'),
         password: properties.get('password'),
-        port:properties.get('port'),
+        port: properties.get('port'),
         timezone: 'utc'
     });
 
@@ -117,13 +127,18 @@ const program = async () => {
                         });
                     }
                     if (monitorIndex > -1) {
-                        mysqlConnection.query(`SELECT * FROM ${MonitoringList}`, function (err, results) {
-                            if (err) {
-                                console.error('Error executing SQL query:', err);
-                            } else {
-                                Monitoringdata = results;
-                                io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
-                            }
+                        mysqlConnection.getConnection(function (err, connection) {
+                            if (err) throw err; // not connected!
+                            // Use the connection
+                            mysqlConnection.query(`SELECT * FROM ${MonitoringList}`, function (err, results) {
+                                if (err) {
+                                    console.error('Error executing SQL query:', err);
+                                } else {
+                                    Monitoringdata = results;
+                                    io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+                                    connection.release();
+                                }
+                            });
                         });
                     }
                     break;
@@ -149,25 +164,43 @@ const program = async () => {
                     break;
 
                 case "INSERT":
-                    mysqlConnection.query(`SELECT * FROM ${MainTable} ORDER BY eventTime DESC`, function (err, results) {
-                        if (err) {
-                            console.error('Error executing SQL query:', err);
-                        } else {
-                            data = results;
-                            io.sockets.emit('data-update', {
-                                "page": Pagebtn,
-                                "pageCount": pagecount,
-                                "Api": [...data.slice(Pagebtn * 21 - 21, Pagebtn * 21)]
-                            });
-                        }
+                    mysqlConnection.getConnection(function (err, connection) {
+                        if (err) throw err; // not connected!
+                        // Use the connection
+                        mysqlConnection.query(`SELECT * FROM ${MainTable} ORDER BY eventTime DESC`, function (err, results) {
+                            if (err) {
+                                console.error('Error executing SQL query:', err);
+                            } else {
+                                data = results;
+                                const pageCount = Math.ceil(results.length / 21);
+                                pagecount = pageCount;
+                                Pagebtn = page;
+                                if (!page) { page = 1; Pagebtn = 1; }
+                                if (page > pageCount) {
+                                    page = pageCount
+                                    Pagebtn = page;
+                                }
+                                io.sockets.emit('data-update', {
+                                    "page": Pagebtn,
+                                    "pageCount": pagecount,
+                                    "Api": [...data.slice(Pagebtn * 21 - 21, Pagebtn * 21)]
+                                });
+                                connection.release();
+                            }
+                        });
                     });
-                    mysqlConnection.query(`SELECT * FROM ${MonitoringList}`, function (err, results) {
-                        if (err) {
-                            console.error('Error executing SQL query:', err);
-                        } else {
-                            Monitoringdata = results;
-                            io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
-                        }
+                    mysqlConnection.getConnection(function (err, connection) {
+                        if (err) throw err; // not connected!
+                        // Use the connection
+                        mysqlConnection.query(`SELECT * FROM ${MonitoringList}`, function (err, results) {
+                            if (err) {
+                                console.error('Error executing SQL query:', err);
+                            } else {
+                                Monitoringdata = results;
+                                io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+                                connection.release();
+                            }
+                        });
                     });
                     break;
                 default:
