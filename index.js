@@ -117,7 +117,7 @@ const program = async () => {
                 case "DELETE":
                     newData = currentData[0].before;
                     let index = data.findIndex(p => p.eventId === newData.eventId);
-                    let monitorIndex = Monitoringdata.findIndex(p => p.eventId === newData.eventId);
+                    let monitorIndex = Monitoringdata.findIndex(p => p.sn === newData.sn);
                     if (index > -1) {
                         data = data.filter(p => p.eventId !== newData.eventId);
                         io.sockets.emit('data-update', {
@@ -147,7 +147,7 @@ const program = async () => {
                     newData = currentData[0].after;
                     // Find index of the deleted product in the current array, if it was there
                     let index2 = data.findIndex(p => p.eventId === newData.eventId);
-                    let index3 = Monitoringdata.findIndex(p => p.eventId === newData.eventId);
+                    let index3 = Monitoringdata.findIndex(p => p.sn === newData.sn);
                     // If product is present, index will be gt -1  
                     if (index2 > -1) {
                         data[index2] = newData;
@@ -164,44 +164,42 @@ const program = async () => {
                     break;
 
                 case "INSERT":
-                    mysqlConnection.getConnection(function (err, connection) {
-                        if (err) throw err; // not connected!
-                        // Use the connection
-                        mysqlConnection.query(`SELECT * FROM ${MainTable} ORDER BY eventTime DESC`, function (err, results) {
-                            if (err) {
-                                console.error('Error executing SQL query:', err);
-                            } else {
-                                data = results;
-                                const pageCount = Math.ceil(results.length / 21);
-                                pagecount = pageCount;
-                                Pagebtn = page;
-                                if (!page) { page = 1; Pagebtn = 1; }
-                                if (page > pageCount) {
-                                    page = pageCount
-                                    Pagebtn = page;
+                    newData = currentData[0].after
+                    if (newData.eventId) {
+                        mysqlConnection.getConnection(function (err, connection) {
+                            if (err) throw err; // not connected!
+                            // Use the connection
+                            mysqlConnection.query(`SELECT * FROM ${MainTable} WHERE Date(eventTime) BETWEEN '${Date}' AND '${moment().format("YYYY-MM-DD")}' ORDER BY eventTime DESC`, function (err, results) {
+                                if (err) {
+                                    console.error('Error executing SQL query:', err);
+                                } else {
+                                    data = results;
+                                    const pageCount = Math.ceil(results.length / 21);
+                                    io.sockets.emit('data-update', {
+                                        "page": Pagebtn,
+                                        "pageCount": pageCount,
+                                        "Api": data.slice(Pagebtn * 21 - 21, Pagebtn * 21)
+                                    });
+                                    connection.release();
                                 }
-                                io.sockets.emit('data-update', {
-                                    "page": Pagebtn,
-                                    "pageCount": pagecount,
-                                    "Api": [...data.slice(Pagebtn * 21 - 21, Pagebtn * 21)]
-                                });
-                                connection.release();
-                            }
+                            });
                         });
-                    });
-                    mysqlConnection.getConnection(function (err, connection) {
-                        if (err) throw err; // not connected!
-                        // Use the connection
-                        mysqlConnection.query(`SELECT * FROM ${MonitoringList}`, function (err, results) {
-                            if (err) {
-                                console.error('Error executing SQL query:', err);
-                            } else {
-                                Monitoringdata = results;
-                                io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
-                                connection.release();
-                            }
+                    }
+                    if (newData.sn) {
+                        mysqlConnection.getConnection(function (err, connection) {
+                            if (err) throw err; // not connected!
+                            // Use the connection
+                            mysqlConnection.query(`SELECT * FROM ${MonitoringList}`, function (err, results) {
+                                if (err) {
+                                    console.error('Error executing SQL query:', err);
+                                } else {
+                                    Monitoringdata = results;
+                                    io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+                                    connection.release();
+                                }
+                            });
                         });
-                    });
+                    }
                     break;
                 default:
                     break;
