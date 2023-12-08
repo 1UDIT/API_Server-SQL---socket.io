@@ -19,16 +19,19 @@ const io = socketIo(server, {
     pingTimeout: 25000
 });
 
-const tableField = require("./src/Router/PlayList");
+const tableField = require("./src/Router/MainTableHeader.js");
 const tableMonitorField = require("./src/Router/tableMonitorField.js");
+const TabSwitcher = require("./src/Router/TabSwitcher.js");
 const DataExport = require("./src/Router/DataExport");
 const mysql = require('mysql');
 const MySQLEvents = require('@rodrigogs/mysql-events');
 const moment = require('moment/moment');
 let data = Array(0);
 let Monitoringdata = Array(0);
-let Pagebtn, pagecount;
 let currentData = Array(0);
+let SrcConnection = Array(0);
+let Pagebtn, pagecount;
+let TabIndex;
 
 
 app.use(cors());
@@ -36,9 +39,11 @@ app.use(cors());
 app.use("/api/GetTableHeader", tableField);
 app.use("/api/ExportData", DataExport);
 app.use("/api/MontiorTableHeader", tableMonitorField);
+app.use("/api/TabSwitcher", TabSwitcher);
 
 const MainTable = properties.get('EventList');
 const MonitoringList = properties.get('monitoringList');
+const SrcConnectionList = properties.get('SrcConnection');
 
 io.sockets.on('connection', async (socket) => {
     socket.on('data-update', (Date, page) => {
@@ -71,21 +76,56 @@ io.sockets.on('connection', async (socket) => {
         });
     });
 
-    mysqlConnection.getConnection(function (err, connection) {
-        if (err) throw err; // not connected!
-        // Use the connection
-        mysqlConnection.query(`SELECT * FROM ${MonitoringList};`, function (err, results) {
-            if (err) {
-                console.error('Error executing SQL query:', err);
-            } else {
-                Monitoringdata = results;
-                io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
-                // console.log('Monitoringdata result', Monitoringdata)  
-                connection.release();
+    socket.on('data', function (data) {
+        console.log(`data received is '${data}'`);
+        TabIndex = data;
+        mysqlConnection.getConnection(function (err, connection) {
+            console.log(TabIndex, "tab");
+            if (err) throw err; // not connected!
+            // Use the connection
+            if (TabIndex === 1) {
+                mysqlConnection.query(`SELECT * FROM ${MonitoringList};`, function (err, results) {
+                    if (err) {
+                        console.error('Error executing SQL query:', err);
+                    } else {
+                        Monitoringdata = results;
+                        io.sockets.emit('Monitor', [...Monitoringdata]);
+                        // console.log('Monitoringdata result', Monitoringdata)  
+                        connection.release();
+                    }
+                });
+            } else if (TabIndex === 2) {
+                mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
+                    if (err) {
+                        console.error('Error executing SQL query:', err);
+                    } else {
+                        SrcConnection = results;
+                        io.sockets.emit('Monitor', [...SrcConnection]);
+                        console.log('SrcConnection result', SrcConnection)
+                        connection.release();
+                    }
+                });
             }
         });
     });
+
+
+    // mysqlConnection.getConnection(function (err, connection) {
+    //     if (err) throw err; // not connected!
+    //     // Use the connection
+    //     mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
+    //         if (err) {
+    //             console.error('Error executing SQL query:', err);
+    //         } else {
+    //             SrcConnection = results;
+    //             io.sockets.emit('SrcConnection', [...SrcConnection]);
+    //             // console.log('SrcConnection result', SrcConnection)
+    //             connection.release();
+    //         }
+    //     });
+    // });
 });
+
 
 
 const program = async () => {

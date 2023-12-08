@@ -2,9 +2,9 @@ const express = require("express");
 
 const router = express.Router(); 
 
-const {  getMonitorHeader } = require("../Controller/MonitoringHeader.js"); 
+const {getMonitorHeaderid } = require("../Controller/MonitoringHeader.js"); 
 
-router.route("/").get(getMonitorHeader); 
+router.route("/").get(getMonitorHeaderid);  
 
 
 module.exports = router; 
