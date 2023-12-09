@@ -76,54 +76,69 @@ io.sockets.on('connection', async (socket) => {
         });
     });
 
-    socket.on('data', function (data) {
-        console.log(`data received is '${data}'`);
-        TabIndex = data;
-        mysqlConnection.getConnection(function (err, connection) {
-            console.log(TabIndex, "tab");
-            if (err) throw err; // not connected!
-            // Use the connection
-            if (TabIndex === 1) {
-                mysqlConnection.query(`SELECT * FROM ${MonitoringList};`, function (err, results) {
-                    if (err) {
-                        console.error('Error executing SQL query:', err);
-                    } else {
-                        Monitoringdata = results;
-                        io.sockets.emit('Monitor', [...Monitoringdata]);
-                        // console.log('Monitoringdata result', Monitoringdata)  
-                        connection.release();
-                    }
-                });
-            } else if (TabIndex === 2) {
-                mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
-                    if (err) {
-                        console.error('Error executing SQL query:', err);
-                    } else {
-                        SrcConnection = results;
-                        io.sockets.emit('Monitor', [...SrcConnection]);
-                        console.log('SrcConnection result', SrcConnection)
-                        connection.release();
-                    }
-                });
+    // socket.on('data', function (data) {
+    //     console.log(`data received is '${data}'`);
+    //     TabIndex = data;
+    //     mysqlConnection.getConnection(function (err, connection) {
+    //         console.log(TabIndex, "tab");
+    //         if (err) throw err; // not connected!
+    //         // Use the connection
+    //         if (TabIndex === 1) {
+    //             mysqlConnection.query(`SELECT * FROM ${MonitoringList};`, function (err, results) {
+    //                 if (err) {
+    //                     console.error('Error executing SQL query:', err);
+    //                 } else {
+    //                     Monitoringdata = results;
+    //                     io.sockets.emit('Monitor', [...Monitoringdata]);
+    //                     // console.log('Monitoringdata result', Monitoringdata)  
+    //                     connection.release();
+    //                 }
+    //             });
+    //         } else if (TabIndex === 2) {
+    //             mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
+    //                 if (err) {
+    //                     console.error('Error executing SQL query:', err);
+    //                 } else {
+    //                     SrcConnection = results;
+    //                     io.sockets.emit('Monitor', [...SrcConnection]);
+    //                     // console.log('SrcConnection result', SrcConnection)
+    //                     connection.release();
+    //                 }
+    //             });
+    //         }
+    //     });
+    // });
+
+    mysqlConnection.getConnection(function (err, connection) {
+        if (err) throw err; // not connected!
+        // Use the connection 
+        mysqlConnection.query(`SELECT * FROM ${MonitoringList};`, function (err, results) {
+            if (err) {
+                console.error('Error executing SQL query:', err);
+            } else {
+                Monitoringdata = results;
+                io.sockets.emit('Monitor', [...Monitoringdata]);
+                // console.log('Monitoringdata result', Monitoringdata)  
+                connection.release();
             }
         });
     });
 
 
-    // mysqlConnection.getConnection(function (err, connection) {
-    //     if (err) throw err; // not connected!
-    //     // Use the connection
-    //     mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
-    //         if (err) {
-    //             console.error('Error executing SQL query:', err);
-    //         } else {
-    //             SrcConnection = results;
-    //             io.sockets.emit('SrcConnection', [...SrcConnection]);
-    //             // console.log('SrcConnection result', SrcConnection)
-    //             connection.release();
-    //         }
-    //     });
-    // });
+    mysqlConnection.getConnection(function (err, connection) {
+        if (err) throw err; // not connected!
+        // Use the connection
+        mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
+            if (err) {
+                console.error('Error executing SQL query:', err);
+            } else {
+                SrcConnection = results;
+                io.sockets.emit('SrcConnection', [...SrcConnection]);
+                // console.log('SrcConnection result', SrcConnection)
+                connection.release();
+            }
+        });
+    });
 });
 
 
@@ -158,6 +173,7 @@ const program = async () => {
                     newData = currentData[0].before;
                     let index = data.findIndex(p => p.eventId === newData.eventId);
                     let monitorIndex = Monitoringdata.findIndex(p => p.sn === newData.sn);
+                    let SrcConnectionIndex = SrcConnection.findIndex(p => p.SrcDestName === newData.SrcDestName);
                     if (index > -1) {
                         data = data.filter(p => p.eventId !== newData.eventId);
                         io.sockets.emit('data-update', {
@@ -175,7 +191,23 @@ const program = async () => {
                                     console.error('Error executing SQL query:', err);
                                 } else {
                                     Monitoringdata = results;
-                                    io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+                                    io.sockets.emit('Monitor', [...Monitoringdata]);
+                                    connection.release();
+                                }
+                            });
+                        });
+                    }
+                    if (SrcConnectionIndex > -1) {
+                        mysqlConnection.getConnection(function (err, connection) {
+                            if (err) throw err; // not connected!
+                            // Use the connection
+                            mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
+                                if (err) {
+                                    console.error('Error executing SQL query:', err);
+                                } else {
+                                    SrcConnection = results;
+                                    io.sockets.emit('SrcConnection', [...SrcConnection]);
+                                    // console.log('SrcConnection result', SrcConnection)
                                     connection.release();
                                 }
                             });
@@ -188,6 +220,8 @@ const program = async () => {
                     // Find index of the deleted product in the current array, if it was there
                     let index2 = data.findIndex(p => p.eventId === newData.eventId);
                     let index3 = Monitoringdata.findIndex(p => p.sn === newData.sn);
+                    let index4 = SrcConnection.findIndex(p => p.SrcDestName === newData.SrcDestName);
+                    console.log(index4, 'index4', newData);
                     // If product is present, index will be gt -1  
                     if (index2 > -1) {
                         data[index2] = newData;
@@ -199,7 +233,23 @@ const program = async () => {
                     }
                     if (index3 > -1) {
                         Monitoringdata[index3] = newData;
-                        io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+                        io.sockets.emit('Monitor', [...Monitoringdata]);
+                    }
+                    if (index4 > -1) {
+                        mysqlConnection.getConnection(function (err, connection) {
+                            if (err) throw err; // not connected!
+                            // Use the connection
+                            mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
+                                if (err) {
+                                    console.error('Error executing SQL query:', err);
+                                } else {
+                                    SrcConnection = results;
+                                    io.sockets.emit('SrcConnection', [...SrcConnection]);
+                                    // console.log('SrcConnection result', SrcConnection)
+                                    connection.release();
+                                }
+                            });
+                        });
                     }
                     break;
 
@@ -234,7 +284,23 @@ const program = async () => {
                                     console.error('Error executing SQL query:', err);
                                 } else {
                                     Monitoringdata = results;
-                                    io.sockets.emit('Monitor', { "Api": [...Monitoringdata] });
+                                    io.sockets.emit('Monitor', [...Monitoringdata]);
+                                    connection.release();
+                                }
+                            });
+                        });
+                    }
+                    if (newData.SrcDestName) {
+                        mysqlConnection.getConnection(function (err, connection) {
+                            if (err) throw err; // not connected!
+                            // Use the connection
+                            mysqlConnection.query(`SELECT * FROM ${SrcConnectionList};`, function (err, results) {
+                                if (err) {
+                                    console.error('Error executing SQL query:', err);
+                                } else {
+                                    SrcConnection = results;
+                                    io.sockets.emit('SrcConnection', [...SrcConnection]);
+                                    // console.log('SrcConnection result', SrcConnection)
                                     connection.release();
                                 }
                             });

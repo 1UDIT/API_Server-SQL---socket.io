@@ -9,7 +9,7 @@ const getMonitorHeaderid = async (req, res, next) => {
     mysqlConnection.getConnection(function (err, connection) {
         if (err) throw err; // not connected!
         // Use the connection
-        mysqlConnection.query(`SELECT E.*  FROM log_viewer.monitoringheader as E  inner JOIN log_viewer.tabswticher as Tab ON Tab.id = E.SwitcherId where E.SwitcherId = '${query}' order by Sequence;  `, function (err, rows) {
+        mysqlConnection.query(`SELECT E.*  FROM monitoringheader as E  inner JOIN tabswticher as Tab ON Tab.id = E.SwitcherId where E.SwitcherId = '${query}' order by Sequence;  `, function (err, rows) {
             if (err) {
                 res.status(400).send(err);
             } else {
