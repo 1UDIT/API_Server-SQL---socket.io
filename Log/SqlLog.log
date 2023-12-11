@@ -1,0 +1,118 @@
+[2023-12-11T16:12:21.025] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:12:21.027] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:12:24.526] [INFO] :: - event_log Table SOCKET Ping
+[2023-12-11T16:12:51.160] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:12:51.161] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:13:17.544] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:13:17.545] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:13:40.355] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:13:40.356] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:14:27.678] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:14:27.679] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:14:50.618] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:14:50.619] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:15:32.059] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:15:32.060] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:15:39.998] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:15:39.999] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:15:55.983] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:15:55.984] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:15:58.899] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:15:58.900] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:16:14.622] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:16:26.648] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:16:26.649] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:16:36.164] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:16:36.165] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:16:41.712] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:16:41.713] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:16:58.077] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:16:58.078] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:17:05.034] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:17:05.035] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:17:18.729] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:17:18.731] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:17:37.973] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:17:37.974] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:17:56.674] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:17:56.676] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:18:00.583] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:18:00.584] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:18:18.851] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:18:18.852] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:18:25.411] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:18:25.413] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:18:27.227] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:18:27.228] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:24:14.073] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:24:14.075] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:24:19.653] [INFO] :: - event_log Table SOCKET Ping
+[2023-12-11T16:24:27.195] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:24:58.794] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:24:58.796] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:25:03.512] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:25:03.513] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:25:09.987] [INFO] :: - get MainTable_header Ping data.length::6
+[2023-12-11T16:25:09.991] [INFO] :: - get Tab  Ping data.length::2
+[2023-12-11T16:25:09.993] [INFO] :: - get Monitor Header Ping data.length::9
+[2023-12-11T16:25:10.191] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:25:10.199] [INFO] :: - Export Ping data.length::0
+[2023-12-11T16:25:10.200] [INFO] :: - event_log Table SOCKET Ping
+[2023-12-11T16:25:11.008] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:25:11.458] [INFO] :: - get Tab  Ping data.length::2
+[2023-12-11T16:25:11.460] [INFO] :: - get Monitor Header Ping data.length::7
+[2023-12-11T16:25:11.463] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:25:11.846] [INFO] :: - get Tab  Ping data.length::2
+[2023-12-11T16:25:11.847] [INFO] :: - get Monitor Header Ping data.length::9
+[2023-12-11T16:25:11.853] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:25:12.244] [INFO] :: - get Tab  Ping data.length::2
+[2023-12-11T16:25:12.245] [INFO] :: - get Monitor Header Ping data.length::7
+[2023-12-11T16:25:12.250] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:25:23.720] [INFO] :: - get MainTable_header Ping data.length::6
+[2023-12-11T16:25:23.723] [INFO] :: - get Tab  Ping data.length::2
+[2023-12-11T16:25:23.725] [INFO] :: - get Monitor Header Ping data.length::9
+[2023-12-11T16:25:23.915] [INFO] :: - Export Ping data.length::0
+[2023-12-11T16:25:23.916] [INFO] :: - event_log Table SOCKET Ping
+[2023-12-11T16:26:22.475] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:26:22.476] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:26:34.717] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:26:34.719] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:26:41.775] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:26:41.776] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:26:51.992] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:26:51.993] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:26:56.362] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:26:56.364] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:27:27.584] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:27:27.585] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:27:35.933] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:27:35.934] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:27:49.061] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:27:49.062] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:28:01.794] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:28:01.795] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:28:26.326] [ERROR] :: - mysqlConnection.getConnection Catch::ReferenceError: resolve is not defined
+[2023-12-11T16:28:26.328] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:31:12.923] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:31:17.497] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:31:33.238] [INFO] :: - get MainTable_header Ping data.length::6
+[2023-12-11T16:31:33.242] [INFO] :: - get Tab  Ping data.length::2
+[2023-12-11T16:31:33.243] [INFO] :: - get Monitor Header Ping data.length::9
+[2023-12-11T16:31:33.408] [INFO] :: - Export Ping data.length::0
+[2023-12-11T16:31:33.416] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:31:33.418] [INFO] :: - event_log Table SOCKET Ping
+[2023-12-11T16:31:35.799] [INFO] :: - event_log Table SOCKET Ping
+[2023-12-11T16:31:36.625] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:31:37.215] [INFO] :: - get Tab  Ping data.length::2
+[2023-12-11T16:31:37.218] [INFO] :: - get Monitor Header Ping data.length::7
+[2023-12-11T16:31:37.228] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:31:37.773] [INFO] :: - get Tab  Ping data.length::2
+[2023-12-11T16:31:37.775] [INFO] :: - get Monitor Header Ping data.length::9
+[2023-12-11T16:31:37.778] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:31:38.731] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:31:58.520] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:32:02.189] [ERROR] :: - mysqlConnection.getConnection::null
+[2023-12-11T16:40:46.613] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:40:47.611] [ERROR] :: - nrinstances srcdeststatus Table SOCKET Ping
+[2023-12-11T16:45:13.190] [INFO] :: - event_log Table SOCKET Ping
+[2023-12-11T16:45:14.357] [INFO] :: - event_log Table SOCKET Ping

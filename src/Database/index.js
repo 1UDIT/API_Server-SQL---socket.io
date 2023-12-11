@@ -1,6 +1,6 @@
 var mysql = require('mysql');
 const properties = require('../../propertiesReader');
-
+const log = require('../../Logger');
 
 var database = properties.get('database');
 var host = properties.get('host');
@@ -9,16 +9,16 @@ var password = properties.get('password');
 var port = properties.get('port');
 
 var mysqlConnection = mysql.createPool({
-  connectionLimit : 20,
+  connectionLimit: 20,
   host: host,
   port: port,
   user: user,
   password: password,
   database: database,
   timezone: 'utc',
-  acquireTimeout:1000,
-  connectTimeout:550, 
-  waitForConnections:1000,  
+  acquireTimeout: 1000,
+  connectTimeout: 550,
+  waitForConnections: 1000,
 });
 
 // var connection;
@@ -45,16 +45,19 @@ var mysqlConnection = mysql.createPool({
 //       throw err;                                  // server variable configures this)
 //     }
 //   });
-// }
+// } 
 
-mysqlConnection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
-  if (error) throw error;
-  console.log('Connected DataBase!: ', results[0].solution);
+mysqlConnection.getConnection((err, con) => {
+  try {
+    if (con) {
+      con.release();
+      console.log('Connected DataBase!:::',);
+    }
+  }
+  catch (err) {
+    log.error(`mysqlConnection.getConnection Catch::${err}`);
+  }
+  log.error(`mysqlConnection.getConnection::${err}`);
 });
-
-// mysqlConnection.connect(function (err) {
-//   if (err) throw err;
-//   console.log("Connected DataBase!");
-// });
 
 module.exports = mysqlConnection;
